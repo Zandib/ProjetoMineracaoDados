@@ -19,3 +19,5 @@ Para re-treinar o modelo, basta executar o arquivo "treino.py" dentro do reposit
 #### Prever
 Para prever os arquivos do diretório "Teste/" basta rodar o arquivo "predict.py" dentro do repositório "Scripts/"<br>
 Um arquivo "resultados_predicoes.csv" será gerado no diretório "Data/"
+#### Imagens/Views
+Todas as imagens presentes no relatório são geradas pelo arquivo "datavis.py" dentro do diretório "Scripts/"
