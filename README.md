@@ -1,3 +1,5 @@
+Disponivel em: https://github.com/Zandib/ProjetoMineracaoDados/
+
 # ProjetoMineracaoDados
 Projeto da disciplina Mineração de dados 2019, segundo quadrimestre
 
