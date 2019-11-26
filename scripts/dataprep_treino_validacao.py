@@ -182,6 +182,6 @@ for c in classes:
     shutil.rmtree('../validacao/'+c)
 
 print('Training set saved at data.csv')
-print('Validation set save at data_validacao.csv')
+print('Validation set saved at data_validacao.csv')
         
     
