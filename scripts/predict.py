@@ -25,8 +25,46 @@ from sklearn.externals import joblib
 #################################################################
 encoder = joblib.load('../models/encoder.pkl')
 scaler = joblib.load('../models/scaler.pkl')
-svmrbf = joblib.load('../models/svcrbf.pkl')
+models ={}
+for target in ['geral', 'a', 'b', 'c', 'd', 'h', 'm', 'n', 'x', '6', '7']:
+    if(target=='geral'):
+        models[target]=joblib.load('../models/SVCrbf.pkl')
+    else:
+        models[target]=joblib.load('../models/SVCrbf_'+target+'.pkl')
 
+#################################################################
+#To Stack multiple models, an heuristic will be used
+#Heuristica:
+class Voter():
+    def __init__(self,models,targets,encoder):
+        self.targets=targets
+        self.models=models
+        self.encoder = encoder
+    
+    def check_line(self,x):
+        x=x.copy()
+        #print(x)
+        x_temp = x.drop('geral')
+        if(x_temp.sum()==1):
+            for i,t in zip(x_temp.index,x_temp):
+                #print(i)
+                if(t==1):
+                    return i
+        else:
+            return x['geral']
+        
+    def Score(self,X,y):
+        predicts = pd.Series(self.predict(X))
+        return (predicts==y).value_counts()[True]/len(y)
+    
+    def predict(self,X):
+        df_predicoes = pd.DataFrame(columns=self.targets)
+        for t in targets:
+            df_predicoes[t]=self.models[t].predict(X)
+        df_predicoes['geral'] = encoder.inverse_transform(df_predicoes['geral'])
+        df_predicoes['predicts'] = df_predicoes.apply(lambda x: self.check_line(x),axis=1)
+        return np.array(df_predicoes['predicts'])
+#################################################################
 
 #################################################################
 #Preping data with external file   
@@ -43,8 +81,12 @@ df_teste = df_teste.drop('filename',axis=1)
 #Scailing
 df_teste = scaler.transform(df_teste)
 #Predicting
-predictions = svmrbf.predict(df_teste)
-predictions = encoder.inverse_transform(predictions)
+targets = ['geral', 'a', 'b', 'c', 'd', 'h', 'm', 'n', 'x', '6', '7']
+vt = Voter(models,targets,encoder)
+predictions = vt.predict(df_teste)
+
+#predictions = svmrbf.predict(df_teste)
+#predictions = encoder.inverse_transform(predictions)
 #print(df_raw['filename'])
 
 #################################################################
