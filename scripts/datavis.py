@@ -110,3 +110,38 @@ plt.bar(encoder.classes_,compilado.transpose()['Acerto_linear'][:-2],label='Line
 plt.legend()
 plt.savefig('../imagens/nmr_acerto_p_char')
 plt.show()
+
+df_valid = pd.read_csv('../data/data_validacao.csv')
+targets = ['geral', 'a', 'b', 'c', 'd', 'h', 'm', 'n', 'x', '6', '7']
+encoder = joblib.load('../models/encoder.pkl')
+models ={}
+scaler = joblib.load('../models/scaler.pkl')
+for target in ['geral', 'a', 'b', 'c', 'd', 'h', 'm', 'n', 'x', '6', '7']:
+    if(target=='geral'):
+        models[target]=joblib.load('../models/SVCrbf.pkl')
+    else:
+        models[target]=joblib.load('../models/SVCrbf_'+target+'.pkl')
+
+vt = Voter(models,targets,encoder)
+
+df_valid = pd.read_csv('../data/data_validacao.csv')
+
+df_valid.drop('filename',axis=1,inplace=True)
+
+X_valid = scaler.transform(df_valid.iloc[:,:-1])
+
+results = pd.DataFrame()
+predictions = vt.predict(X_valid)
+results['real'] = df_valid['label'].copy()
+results['predict'] = predictions
+results['result'] = (predictions==df_valid['label'])
+mistakes=results.loc[results['result']==False]
+
+mistakes['par']=mistakes['predict']+mistakes['real']
+mistakes['par']=mistakes['par'].apply(lambda x: ''.join(sorted(x)))
+
+plt.figure(figsize=(15,7))
+plt.plot(mistakes['par'].value_counts().cumsum()/mistakes['par'].value_counts().sum())
+plt.title('% Acumulada dos erros por par de palavra (real/predito)')
+plt.savefig('../imagens/erro_acumulado.png')
+plt.show()
